@@ -15,6 +15,49 @@
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         {{ __('Dashboard') }}
                     </x-nav-link>
+
+                    <!-- Enlace para el CRUD de ofertas laborales solo para empresas -->
+                    @auth
+                        @if (Auth::user()->isEmpresa())
+                            <x-nav-link :href="route('job_offers.index')" :active="request()->routeIs('job_offers.index')">
+                                {{ __('Job Offers') }}
+                            </x-nav-link>
+
+                            <!-- Enlace para gestionar supervisores -->
+                            <x-nav-link :href="route('empresa.supervisores.index')" :active="request()->routeIs('empresa.supervisores.index')">
+                                {{ __('Supervisores') }}
+                            </x-nav-link>
+
+                            <!-- Enlace para ver las postulaciones recibidas -->
+                            <x-nav-link :href="route('empresa.postulaciones.index')" :active="request()->routeIs('empresa.postulaciones.index')">
+                                {{ __('Postulaciones Recibidas') }}
+                            </x-nav-link>
+                        @endif
+
+                        <!-- Enlace para el CRUD de ofertas laborales solo para postulantes -->
+                        @if (Auth::user()->isPostulante())
+                            <x-nav-link :href="route('postulante.job_offers.index')" :active="request()->routeIs('postulante.job_offers.index')">
+                                {{ __('Ofertas Laborales') }}
+                            </x-nav-link>
+
+                            <!-- Enlace para que los postulantes vean las aplicaciones que han hecho -->
+                            <x-nav-link :href="route('postulante.aplicaciones')" :active="request()->routeIs('postulante.aplicaciones')">
+                                {{ __('Mis Aplicaciones') }}
+                            </x-nav-link>
+                        @endif
+                    @endauth
+
+                    <!-- Enlace para el CRUD de usuarios solo para administradores -->
+                    @auth
+                        @if (Auth::user()->isAdmin())
+                            <x-nav-link :href="route('admin.users.index')" :active="request()->routeIs('admin.users.index')">
+                                {{ __('Usuarios') }}
+                            </x-nav-link>
+                            <x-nav-link :href="route('admin.empresas.index')" :active="request()->routeIs('admin.empresas.index')">
+                                {{ __('Empresas') }}
+                            </x-nav-link>
+                        @endif
+                    @endauth
                 </div>
             </div>
 
@@ -24,10 +67,16 @@
                     <x-slot name="trigger">
                         <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150">
                             <div>{{ Auth::user()->name }}</div>
-
+                            <div class="ml-3">
+                                @if (Auth::user()->profile_photo_path)
+                                    <img class="h-12 w-12 rounded-full object-cover" src="{{ asset('storage/' . Auth::user()->profile_photo_path) }}" alt="{{ Auth::user()->name }}">
+                                @else
+                                    <img class="h-12 w-12 rounded-full object-cover" src="{{ asset('images/default-profile.png') }}" alt="{{ Auth::user()->name }}">
+                                @endif
+                            </div>
                             <div class="ml-1">
                                 <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 111.414 1.414l-4 4a1 1 01-1.414 0l-4-4a1 1 010-1.414z" clip-rule="evenodd" />
                                 </svg>
                             </div>
                         </button>
@@ -38,10 +87,8 @@
                             {{ __('Profile') }}
                         </x-dropdown-link>
 
-                        <!-- Authentication -->
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
-
                             <x-dropdown-link :href="route('logout')"
                                     onclick="event.preventDefault();
                                                 this.closest('form').submit();">
@@ -70,6 +117,40 @@
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
+
+            @auth
+                @if (Auth::user()->isEmpresa())
+                    <x-responsive-nav-link :href="route('job_offers.index')" :active="request()->routeIs('job_offers.index')">
+                        {{ __('Job Offers') }}
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('empresa.supervisores.index')" :active="request()->routeIs('empresa.supervisores.index')">
+                        {{ __('Supervisores') }}
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('empresa.postulaciones.index')" :active="request()->routeIs('empresa.postulaciones.index')">
+                        {{ __('Postulaciones Recibidas') }}
+                    </x-responsive-nav-link>
+                @endif
+
+                @if (Auth::user()->isPostulante())
+                    <x-responsive-nav-link :href="route('postulante.job_offers.index')" :active="request()->routeIs('postulante.job_offers.index')">
+                        {{ __('Ofertas Laborales') }}
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('postulante.aplicaciones')" :active="request()->routeIs('postulante.aplicaciones')">
+                        {{ __('Mis Aplicaciones') }}
+                    </x-responsive-nav-link>
+                @endif
+            @endauth
+
+            @auth
+                @if (Auth::user()->isAdmin())
+                    <x-responsive-nav-link :href="route('admin.users.index')" :active="request()->routeIs('admin.users.index')">
+                        {{ __('Usuarios') }}
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('admin.empresas.index')" :active="request()->routeIs('admin.empresas.index')">
+                        {{ __('Empresas') }}
+                    </x-responsive-nav-link>
+                @endif
+            @endauth
         </div>
 
         <!-- Responsive Settings Options -->
@@ -84,10 +165,8 @@
                     {{ __('Profile') }}
                 </x-responsive-nav-link>
 
-                <!-- Authentication -->
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
-
                     <x-responsive-nav-link :href="route('logout')"
                             onclick="event.preventDefault();
                                         this.closest('form').submit();">

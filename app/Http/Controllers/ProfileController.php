@@ -7,6 +7,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class ProfileController extends Controller
@@ -26,13 +27,40 @@ class ProfileController extends Controller
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
-        $request->user()->fill($request->validated());
+        $user = $request->user();
 
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
+        // Manejar la carga de la foto de perfil
+        if ($request->hasFile('profile_photo')) {
+            // Eliminar la foto anterior si existe
+            if ($user->profile_photo_path && Storage::exists('public/' . $user->profile_photo_path)) {
+                Storage::delete('public/' . $user->profile_photo_path);
+            }
+
+            // Guardar la nueva foto de perfil
+            $photoPath = $request->file('profile_photo')->store('profile_photos', 'public');
+            $user->profile_photo_path = $photoPath;
         }
 
-        $request->user()->save();
+        // Manejar la carga del CV
+        if ($request->hasFile('archivo_cv')) { // Cambiado de 'cv' a 'archivo_cv'
+            // Eliminar el CV anterior si existe
+            if ($user->archivo_cv && Storage::exists('public/' . $user->archivo_cv)) {
+                Storage::delete('public/' . $user->archivo_cv);
+            }
+
+            // Guardar el nuevo CV
+            $cvPath = $request->file('archivo_cv')->store('cvs', 'public');
+            $user->archivo_cv = $cvPath; // Actualiza la propiedad archivo_cv
+        }
+
+        // Actualizar el resto de la información del perfil
+        $user->fill($request->validated());
+
+        if ($user->isDirty('email')) {
+            $user->email_verified_at = null;
+        }
+
+        $user->save();
 
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
     }
