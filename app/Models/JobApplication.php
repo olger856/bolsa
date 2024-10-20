@@ -9,6 +9,11 @@ class JobApplication extends Model
 {
     use HasFactory;
 
+    // Constantes para el estado de la postulación
+    const STATUS_PENDING = 1; // Pendiente
+    const STATUS_APPROVED = 2; // Aprobado
+    const STATUS_REJECTED = 3; // Rechazado
+
     // Campos que pueden ser asignados de manera masiva
     protected $fillable = [
         'job_offer_id',
