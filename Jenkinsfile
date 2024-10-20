@@ -9,7 +9,7 @@ pipeline {
         stage('Clone') {
             steps {
                 timeout(time: 2, unit: 'MINUTES') {
-                    git branch: 'main', credentialsId: 'github_credentials_id', url:'https://github.com/olger856/bolsa.git'
+                    git branch: 'main', credentialsId: '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', url:'https://github.com/olger856/bolsa.git'
                 }
             }
         }
