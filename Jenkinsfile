@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     tools {
-        // Define Composer como herramienta si está configurado en Jenkins.
+        composer 'Composer_Home' // Nombre de la instalación de Composer configurada en Jenkins
     }
 
     stages {
@@ -54,8 +54,22 @@ pipeline {
         stage('Deploy') {
             steps {
                 echo "Despliegue del proyecto Laravel 'bolsa'."
-                // Aquí puedes añadir comandos de despliegue de Laravel, como:
-                // sh "php artisan migrate --force"
+                // Instalar dependencias en modo producción
+		        sh "composer install --no-dev --optimize-autoloader"
+		        
+		        // Ejecutar migraciones de la base de datos
+		        sh "php artisan migrate --force"
+		        
+		        // Poblar la base de datos si es necesario
+		        sh "php artisan db:seed --force"
+		        
+		        // Optimización para producción
+		        sh "php artisan config:cache"
+		        sh "php artisan route:cache"
+		        sh "php artisan view:cache"
+		        
+		        // Reiniciar servicios (ejemplo con nginx)
+		        sh "sudo service nginx restart"
             }
         }
     }
