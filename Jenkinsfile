@@ -12,15 +12,15 @@ pipeline {
         stage('Install Dependencies') {
             steps {
                 timeout(time: 8, unit: 'MINUTES') {
-                    // Usa la ruta completa de Composer si no está en el PATH
-                    bat 'C:\\ProgramData\\ComposerSetup\\bin\\composer install'
+                    // Usa "sh" en lugar de "bat" para entornos basados en Linux
+                    sh 'composer install'
                 }
             }
         }
         stage('Run Tests') {
             steps {
                 timeout(time: 8, unit: 'MINUTES') {
-                    bat "php artisan test"
+                    sh "php artisan test"
                 }
             }
         }
@@ -28,7 +28,7 @@ pipeline {
             steps {
                 timeout(time: 4, unit: 'MINUTES') {
                     withSonarQubeEnv('sonarqube') {
-                        bat """
+                        sh """
                         sonar-scanner \
                         -Dsonar.projectKey=bolsa \
                         -Dsonar.sources=app,resources,routes \
@@ -53,21 +53,21 @@ pipeline {
                 echo "Despliegue del proyecto Laravel 'bolsa'."
                 
                 // Instalar dependencias en modo producción
-                bat 'C:\\ProgramData\\ComposerSetup\\bin\\composer install --no-dev --optimize-autoloader'
+                sh 'composer install --no-dev --optimize-autoloader'
                 
                 // Ejecutar migraciones de la base de datos
-                bat "php artisan migrate --force"
+                sh "php artisan migrate --force"
                 
                 // Poblar la base de datos si es necesario
-                bat "php artisan db:seed --force"
+                sh "php artisan db:seed --force"
                 
                 // Optimización para producción
-                bat "php artisan config:cache"
-                bat "php artisan route:cache"
-                bat "php artisan view:cache"
+                sh "php artisan config:cache"
+                sh "php artisan route:cache"
+                sh "php artisan view:cache"
                 
-                // Reiniciar servicios (ejemplo con IIS)
-                bat "iisreset"
+                // Reiniciar servicios (ejemplo con nginx)
+                sh "sudo service nginx restart"
             }
         }
     }
