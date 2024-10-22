@@ -5,21 +5,22 @@ pipeline {
         stage('Clone') {
             steps {
                 timeout(time: 2, unit: 'MINUTES') {
-                    git branch: 'main', credentialsId: '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', url:'https://github.com/olger856/bolsa.git'
+                    git branch: 'main', credentialsId: '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', url: 'https://github.com/olger856/bolsa.git'
                 }
             }
         }
         stage('Install Dependencies') {
             steps {
                 timeout(time: 8, unit: 'MINUTES') {
-                    sh "composer install"
+                    // Usa la ruta completa de Composer si no está en el PATH
+                    bat 'C:\\ProgramData\\ComposerSetup\\bin\\composer install'
                 }
             }
         }
         stage('Run Tests') {
             steps {
                 timeout(time: 8, unit: 'MINUTES') {
-                    sh "php artisan test"
+                    bat "php artisan test"
                 }
             }
         }
@@ -27,7 +28,7 @@ pipeline {
             steps {
                 timeout(time: 4, unit: 'MINUTES') {
                     withSonarQubeEnv('sonarqube') {
-                        sh """
+                        bat """
                         sonar-scanner \
                         -Dsonar.projectKey=bolsa \
                         -Dsonar.sources=app,resources,routes \
@@ -52,21 +53,21 @@ pipeline {
                 echo "Despliegue del proyecto Laravel 'bolsa'."
                 
                 // Instalar dependencias en modo producción
-                sh "composer install --no-dev --optimize-autoloader"
+                bat 'C:\\ProgramData\\ComposerSetup\\bin\\composer install --no-dev --optimize-autoloader'
                 
                 // Ejecutar migraciones de la base de datos
-                sh "php artisan migrate --force"
+                bat "php artisan migrate --force"
                 
                 // Poblar la base de datos si es necesario
-                sh "php artisan db:seed --force"
+                bat "php artisan db:seed --force"
                 
                 // Optimización para producción
-                sh "php artisan config:cache"
-                sh "php artisan route:cache"
-                sh "php artisan view:cache"
+                bat "php artisan config:cache"
+                bat "php artisan route:cache"
+                bat "php artisan view:cache"
                 
-                // Reiniciar servicios (ejemplo con nginx)
-                sh "sudo service nginx restart"
+                // Reiniciar servicios (ejemplo con IIS)
+                bat "iisreset"
             }
         }
     }
