@@ -1,10 +1,6 @@
 pipeline {
     agent any
 
-    tools {
-        composer 'Composer_Home' // Nombre de la instalación de Composer configurada en Jenkins
-    }
-
     stages {
         stage('Clone') {
             steps {
@@ -54,22 +50,23 @@ pipeline {
         stage('Deploy') {
             steps {
                 echo "Despliegue del proyecto Laravel 'bolsa'."
+                
                 // Instalar dependencias en modo producción
-		        sh "composer install --no-dev --optimize-autoloader"
-		        
-		        // Ejecutar migraciones de la base de datos
-		        sh "php artisan migrate --force"
-		        
-		        // Poblar la base de datos si es necesario
-		        sh "php artisan db:seed --force"
-		        
-		        // Optimización para producción
-		        sh "php artisan config:cache"
-		        sh "php artisan route:cache"
-		        sh "php artisan view:cache"
-		        
-		        // Reiniciar servicios (ejemplo con nginx)
-		        sh "sudo service nginx restart"
+                sh "composer install --no-dev --optimize-autoloader"
+                
+                // Ejecutar migraciones de la base de datos
+                sh "php artisan migrate --force"
+                
+                // Poblar la base de datos si es necesario
+                sh "php artisan db:seed --force"
+                
+                // Optimización para producción
+                sh "php artisan config:cache"
+                sh "php artisan route:cache"
+                sh "php artisan view:cache"
+                
+                // Reiniciar servicios (ejemplo con nginx)
+                sh "sudo service nginx restart"
             }
         }
     }
