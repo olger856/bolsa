@@ -12,8 +12,8 @@ pipeline {
         stage('Install Dependencies') {
             steps {
                 timeout(time: 8, unit: 'MINUTES') {
-                    // Ahora puedes ejecutar composer directamente
-                    bat 'composer install'
+                    // Usa la ruta completa para ejecutar composer en Windows
+                    bat 'C:\\composer\\composer install'
                 }
             }
         }
@@ -53,7 +53,7 @@ pipeline {
                 echo "Despliegue del proyecto Laravel 'bolsa'."
                 
                 // Instalar dependencias en modo producción
-                bat 'composer install --no-dev --optimize-autoloader'
+                bat 'C:\\composer\\composer install --no-dev --optimize-autoloader'
                 
                 // Ejecutar migraciones de la base de datos
                 bat "php artisan migrate --force"
