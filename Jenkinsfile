@@ -12,15 +12,15 @@ pipeline {
         stage('Install Dependencies') {
             steps {
                 timeout(time: 8, unit: 'MINUTES') {
-                    // Usa "sh" en lugar de "bat" para entornos basados en Linux
-                    sh 'composer install'
+                    // Ahora puedes ejecutar composer directamente
+                    bat 'composer install'
                 }
             }
         }
         stage('Run Tests') {
             steps {
                 timeout(time: 8, unit: 'MINUTES') {
-                    sh "php artisan test"
+                    bat "php artisan test"
                 }
             }
         }
@@ -28,7 +28,7 @@ pipeline {
             steps {
                 timeout(time: 4, unit: 'MINUTES') {
                     withSonarQubeEnv('sonarqube') {
-                        sh """
+                        bat """
                         sonar-scanner \
                         -Dsonar.projectKey=bolsa \
                         -Dsonar.sources=app,resources,routes \
@@ -53,21 +53,21 @@ pipeline {
                 echo "Despliegue del proyecto Laravel 'bolsa'."
                 
                 // Instalar dependencias en modo producción
-                sh 'composer install --no-dev --optimize-autoloader'
+                bat 'composer install --no-dev --optimize-autoloader'
                 
                 // Ejecutar migraciones de la base de datos
-                sh "php artisan migrate --force"
+                bat "php artisan migrate --force"
                 
                 // Poblar la base de datos si es necesario
-                sh "php artisan db:seed --force"
+                bat "php artisan db:seed --force"
                 
                 // Optimización para producción
-                sh "php artisan config:cache"
-                sh "php artisan route:cache"
-                sh "php artisan view:cache"
+                bat "php artisan config:cache"
+                bat "php artisan route:cache"
+                bat "php artisan view:cache"
                 
-                // Reiniciar servicios (ejemplo con nginx)
-                sh "sudo service nginx restart"
+                // Reiniciar servicios (ejemplo con IIS)
+                bat "iisreset"
             }
         }
     }
