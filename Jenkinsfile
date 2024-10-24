@@ -9,25 +9,23 @@ pipeline {
     }
 
     stages {
-        stage('Clone') {
+        stage('Prepare Workspace') {
             steps {
-                timeout(time: 2, unit: 'MINUTES') {
-                    git branch: 'main', credentialsId: GIT_CREDENTIALS_ID, url: 'https://github.com/olger856/bolsa.git'
-                }
+                // Eliminar el archivo .env si existe antes del checkout
+                sh 'rm -f /var/jenkins_home/workspace/Bolsa-pipe/.env || true'
             }
         }
 
         stage('Checkout') {
             steps {
+                // Ejecuta el checkout
                 checkout scm
-                // Añadir este paso para eliminar .env después de clonarlo
-                sh 'rm -f /var/jenkins_home/workspace/Bolsa-pipe/.env'
             }
         }
 
         stage('Install Dependencies') {
             steps {
-                timeout(time: 8, unit: 'MINUTES') {
+                timeout(time: 10, unit: 'MINUTES') {
                     sh 'composer install'
                     sh 'php artisan key:generate'
                 }
@@ -36,18 +34,23 @@ pipeline {
 
         stage('Run Tests') {
             steps {
-                timeout(time: 8, unit: 'MINUTES') {
-                    // Ejecutar migraciones y seeders antes de los tests
-                    sh 'php artisan migrate --force'
-                    sh 'php artisan db:seed --force'
-                    sh 'php artisan test'
+                timeout(time: 10, unit: 'MINUTES') {
+                    // Ejecutar migraciones, seeders y tests
+                    try {
+                        sh 'php artisan migrate --force'
+                        sh 'php artisan db:seed --force'
+                        sh 'php artisan test'
+                    } catch (Exception e) {
+                        echo "Error al correr las migraciones o los tests: ${e}"
+                        error "Failed during Run Tests stage"
+                    }
                 }
             }
         }
 
         stage('Sonar Analysis') {
             steps {
-                timeout(time: 4, unit: 'MINUTES') {
+                timeout(time: 6, unit: 'MINUTES') {
                     withSonarQubeEnv('sonarqube') {
                         sh """
                         sonar-scanner \
@@ -82,6 +85,15 @@ pipeline {
                 sh 'php artisan route:cache'
                 sh 'php artisan view:cache'
             }
+        }
+    }
+
+    post {
+        failure {
+            echo "El pipeline ha fallado. Revisa los logs para más detalles."
+        }
+        success {
+            echo "El pipeline ha finalizado correctamente."
         }
     }
 
