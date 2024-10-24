@@ -37,7 +37,7 @@ pipeline {
                 timeout(time: 8, unit: 'MINUTES') {
                     sh 'composer install'
                     echo 'analizar'
-                    sh 'touch .env'
+                    sh 'touch /var/jenkins_home/workspace/Bolsa-pipe/.env'
                     sh 'cp .env.d .env'
                     sh 'php artisan key:generate'
                 }
