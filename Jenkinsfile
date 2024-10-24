@@ -36,6 +36,7 @@ pipeline {
             steps {
                 timeout(time: 8, unit: 'MINUTES') {
                     sh 'composer install'
+                    echo 'analizar'
                     sh 'php artisan key:generate'
                 }
             }
