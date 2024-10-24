@@ -2,10 +2,9 @@ pipeline {
     agent any
 
     environment {
-        // Variables de entorno para credenciales, configuradas en Jenkins
         GIT_CREDENTIALS_ID = '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'
         SONARQUBE_TOKEN = credentials('SONARQUBE_TOKEN')  // Token seguro almacenado en Jenkins
-        SONARQUBE_URL = 'https://localhost:9000'  // URL de SonarQube (ajustar según tu instalación)
+        SONARQUBE_URL = 'http://localhost:9000'  // URL de SonarQube
     }
 
     stages {
@@ -20,7 +19,8 @@ pipeline {
         stage('Install Dependencies') {
             steps {
                 timeout(time: 8, unit: 'MINUTES') {
-                    bat 'C:\\composer\\composer install'
+                    // Cambiar de 'bat' a 'sh' para entornos Linux
+                    sh 'composer install'
                 }
             }
         }
@@ -28,7 +28,8 @@ pipeline {
         stage('Run Tests') {
             steps {
                 timeout(time: 8, unit: 'MINUTES') {
-                    bat "php artisan test"
+                    // Cambiar de 'bat' a 'sh'
+                    sh "php artisan test"
                 }
             }
         }
@@ -37,7 +38,7 @@ pipeline {
             steps {
                 timeout(time: 4, unit: 'MINUTES') {
                     withSonarQubeEnv('sonarqube') {
-                        bat """
+                        sh """
                         sonar-scanner \
                         -Dsonar.projectKey=bolsa \
                         -Dsonar.sources=app,resources,routes \
@@ -63,28 +64,27 @@ pipeline {
             steps {
                 echo "Despliegue del proyecto Laravel 'bolsa'."
                 
-                // Instalar dependencias en modo producción
-                bat 'C:\\composer\\composer install --no-dev --optimize-autoloader'
+                // Instalar dependencias en modo producción (cambiar a 'sh')
+                sh 'composer install --no-dev --optimize-autoloader'
                 
-                // Ejecutar migraciones de la base de datos
-                bat "php artisan migrate --force"
+                // Ejecutar migraciones de la base de datos (cambiar a 'sh')
+                sh "php artisan migrate --force"
                 
-                // Poblar la base de datos si es necesario
-                bat "php artisan db:seed --force"
+                // Poblar la base de datos si es necesario (cambiar a 'sh')
+                sh "php artisan db:seed --force"
                 
-                // Optimización para producción
-                bat "php artisan config:cache"
-                bat "php artisan route:cache"
-                bat "php artisan view:cache"
+                // Optimización para producción (cambiar a 'sh')
+                sh "php artisan config:cache"
+                sh "php artisan route:cache"
+                sh "php artisan view:cache"
                 
-                // Reiniciar servicios (ejemplo con IIS)
-                bat "iisreset"
+                // Si usas algún servidor como Nginx, puedes reiniciarlo con un comando de shell
+                // sh "sudo service nginx reload" (dependiendo del servidor que uses)
             }
         }
     }
 
     options {
-        // Descartar las 10 compilaciones más antiguas
         buildDiscarder(logRotator(numToKeepStr: '10'))
     }
 }
