@@ -12,6 +12,8 @@ pipeline {
         stage('Clone') {
             steps {
                 timeout(time: 2, unit: 'MINUTES') {
+                    // Intentamos eliminar el archivo .env antes del checkout
+                    sh 'rm -f /var/jenkins_home/workspace/Bolsa-pipe/.env || true'
                     git branch: 'main', credentialsId: GIT_CREDENTIALS_ID, url: 'https://github.com/olger856/bolsa.git'
                 }
             }
@@ -22,8 +24,6 @@ pipeline {
                 script {
                     try {
                         checkout scm
-                        // Añadir este paso para eliminar .env después de clonarlo
-                        sh 'rm -f /var/jenkins_home/workspace/Bolsa-pipe/.env'
                     } catch (Exception e) {
                         echo "Error during checkout: ${e}"
                         error "Stopping pipeline due to checkout failure"
