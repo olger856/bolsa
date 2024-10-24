@@ -13,7 +13,7 @@ pipeline {
             steps {
                 timeout(time: 2, unit: 'MINUTES') {
                     // Intentamos eliminar el archivo .env antes del checkout
-                    sh 'rm -f /var/jenkins_home/workspace/Bolsa-pipe/.env || true'
+                    sh 'rm -rf /var/jenkins_home/workspace/Bolsa-pipe/.env || true'
                     git branch: 'main', credentialsId: GIT_CREDENTIALS_ID, url: 'https://github.com/olger856/bolsa.git'
                 }
             }
@@ -37,7 +37,7 @@ pipeline {
                 timeout(time: 8, unit: 'MINUTES') {
                     sh 'composer install'
                     echo 'analizar'
-                    sh 'chmod 755 .env'
+                    sh '[ -f .env ] || touch .env && chmod 755 .env'
                     sh 'cp .env.d .env'
                     sh 'php artisan key:generate'
                 }
