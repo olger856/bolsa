@@ -45,6 +45,7 @@ pipeline {
             steps {
                 timeout(time: 8, unit: 'MINUTES') {
                     // Ejecutar migraciones y seeders antes de los tests
+                    sh 'sleep 10'  // Añadir una espera para asegurarse de que MySQL esté listo
                     sh 'php artisan migrate --force'
                     sh 'php artisan db:seed --force'
                     sh 'php artisan test'
