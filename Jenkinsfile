@@ -21,6 +21,7 @@ pipeline {
                 timeout(time: 8, unit: 'MINUTES') {
                     // Cambiar de 'bat' a 'sh' para entornos Linux
                     sh 'composer install'
+                    sh 'php artisan key:generate'  // Genera la APP_KEY
                 }
             }
         }
@@ -29,6 +30,8 @@ pipeline {
             steps {
                 timeout(time: 8, unit: 'MINUTES') {
                     // Cambiar de 'bat' a 'sh'
+                    sh "php artisan migrate --force"
+                    sh "php artisan db:seed --force"
                     sh "php artisan test"
                 }
             }
