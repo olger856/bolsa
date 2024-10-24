@@ -3,8 +3,9 @@ pipeline {
 
     environment {
         GIT_CREDENTIALS_ID = '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'
-        SONARQUBE_TOKEN = credentials('SONARQUBE_TOKEN')  // Token seguro almacenado en Jenkins
-        SONARQUBE_URL = 'http://localhost:9000'  // URL de SonarQube
+        SONARQUBE_TOKEN = credentials('SONARQUBE_TOKEN')
+        SONARQUBE_URL = 'http://localhost:9000'
+        DB_HOST = 'mysql_jenkins'  // Usamos el servicio MySQL dentro de Docker
     }
 
     stages {
@@ -15,13 +16,20 @@ pipeline {
                 }
             }
         }
-        
+
+        stage('Checkout') {
+            steps {
+                checkout scm
+                // Añadir este paso para eliminar .env después de clonarlo
+                sh 'rm -f /var/jenkins_home/workspace/Bolsa-pipe/.env'
+            }
+        }
+
         stage('Install Dependencies') {
             steps {
                 timeout(time: 8, unit: 'MINUTES') {
-                    // Cambiar de 'bat' a 'sh' para entornos Linux
                     sh 'composer install'
-                    sh 'php artisan key:generate'  // Genera la APP_KEY
+                    sh 'php artisan key:generate'
                 }
             }
         }
@@ -29,10 +37,10 @@ pipeline {
         stage('Run Tests') {
             steps {
                 timeout(time: 8, unit: 'MINUTES') {
-                    // Cambiar de 'bat' a 'sh'
-                    sh "php artisan migrate --force"
-                    sh "php artisan db:seed --force"
-                    sh "php artisan test"
+                    // Ejecutar migraciones y seeders antes de los tests
+                    sh 'php artisan migrate --force'
+                    sh 'php artisan db:seed --force'
+                    sh 'php artisan test'
                 }
             }
         }
@@ -56,7 +64,7 @@ pipeline {
 
         stage('Quality Gate') {
             steps {
-                sleep(10) // Esperar unos segundos para que se procese el Quality Gate
+                sleep(10)
                 timeout(time: 2, unit: 'MINUTES') {
                     waitForQualityGate abortPipeline: true
                 }
@@ -67,22 +75,12 @@ pipeline {
             steps {
                 echo "Despliegue del proyecto Laravel 'bolsa'."
                 
-                // Instalar dependencias en modo producción (cambiar a 'sh')
                 sh 'composer install --no-dev --optimize-autoloader'
-                
-                // Ejecutar migraciones de la base de datos (cambiar a 'sh')
-                sh "php artisan migrate --force"
-                
-                // Poblar la base de datos si es necesario (cambiar a 'sh')
-                sh "php artisan db:seed --force"
-                
-                // Optimización para producción (cambiar a 'sh')
-                sh "php artisan config:cache"
-                sh "php artisan route:cache"
-                sh "php artisan view:cache"
-                
-                // Si usas algún servidor como Nginx, puedes reiniciarlo con un comando de shell
-                // sh "sudo service nginx reload" (dependiendo del servidor que uses)
+                sh 'php artisan migrate --force'
+                sh 'php artisan db:seed --force'
+                sh 'php artisan config:cache'
+                sh 'php artisan route:cache'
+                sh 'php artisan view:cache'
             }
         }
     }
