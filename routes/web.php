@@ -6,17 +6,20 @@ use App\Http\Controllers\Admin\UserApprovalController;
 use App\Http\Controllers\PostulantJobOfferController;
 use App\Http\Controllers\PostulacionesController;
 use App\Http\Controllers\JobOfferController;
-use App\Http\Controllers\EmpresaJobOfferController; 
+use App\Http\Controllers\EmpresaJobOfferController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
+// Definir una constante para las rutas
+define('PROFILE_ROUTE', '/profile');
+
 /*
-|--------------------------------------------------------------------------- 
+|---------------------------------------------------------------------------
 | Web Routes
-|--------------------------------------------------------------------------- 
-| 
+|---------------------------------------------------------------------------
+|
 | Aquí puedes registrar las rutas web para tu aplicación.
-| 
+|
 */
 
 // Ruta de bienvenida
@@ -31,9 +34,9 @@ Route::get('/dashboard', function () {
 
 // Grupo de rutas accesibles solo para usuarios autenticados y aprobados
 Route::middleware(['auth', 'approved'])->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::get(PROFILE_ROUTE, [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch(PROFILE_ROUTE, [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete(PROFILE_ROUTE, [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     // Ruta para cambiar el estado de aprobación del usuario
     Route::post('/users/{id}/toggle-approval', [UserApprovalController::class, 'toggleApproval'])->name('users.toggleApproval');
@@ -51,17 +54,17 @@ Route::middleware(['auth', 'role:1', 'approved'])->group(function () {
     Route::get('/admin/supervisores/index', [UserController::class, 'indexSupervisores'])->name('admin.supervisores.index'); // Mostrar supervisores
     Route::get('/admin/users/create', [UserController::class, 'create'])->name('admin.users.create');
     Route::get('/admin/empresas/create', [UserController::class, 'createEmpresa'])->name('admin.empresas.create');
-    Route::get('/admin/supervisores/create', [UserController::class, 'createSupervisor'])->name('admin.supervisores.create'); 
+    Route::get('/admin/supervisores/create', [UserController::class, 'createSupervisor'])->name('admin.supervisores.create');
     Route::post('/admin/users', [UserController::class, 'store'])->name('admin.users.store');
     Route::get('/admin/users/{user}/edit', [UserController::class, 'edit'])->name('admin.users.edit');
     Route::get('/admin/empresas/{user}/edit', [UserController::class, 'editEmpresa'])->name('admin.empresas.edit');
-    Route::get('/admin/supervisores/{supervisor}/edit', [UserController::class, 'editSupervisor'])->name('admin.supervisores.edit'); 
+    Route::get('/admin/supervisores/{supervisor}/edit', [UserController::class, 'editSupervisor'])->name('admin.supervisores.edit');
     Route::put('/admin/users/{user}', [UserController::class, 'update'])->name('admin.users.update');
     Route::put('/admin/empresas/{user}', [UserController::class, 'updateEmpresa'])->name('admin.empresas.update');
-    Route::put('/admin/supervisores/{supervisor}', [UserController::class, 'updateSupervisor'])->name('admin.supervisores.update'); 
+    Route::put('/admin/supervisores/{supervisor}', [UserController::class, 'updateSupervisor'])->name('admin.supervisores.update');
     Route::delete('/admin/users/{user}', [UserController::class, 'destroy'])->name('admin.users.destroy');
     Route::delete('/admin/empresas/{user}', [UserController::class, 'destroyEmpresa'])->name('admin.empresas.destroy');
-    Route::delete('/admin/supervisores/{supervisor}', [UserController::class, 'destroySupervisor'])->name('admin.supervisores.destroy'); 
+    Route::delete('/admin/supervisores/{supervisor}', [UserController::class, 'destroySupervisor'])->name('admin.supervisores.destroy');
     Route::get('/admin/users/unapproved', [UserApprovalController::class, 'showUnapproved'])->name('admin.users.unapproved');
 });
 
@@ -78,7 +81,7 @@ Route::middleware(['auth', 'role:2', 'approved'])->group(function () {
     Route::get('/empresa/ofertas/{jobOffer}/edit', [JobOfferController::class, 'edit'])->name('job_offers.edit');
     Route::put('/empresa/ofertas/{jobOffer}', [JobOfferController::class, 'update'])->name('job_offers.update');
     Route::delete('/empresa/ofertas/{jobOffer}', [JobOfferController::class, 'destroy'])->name('job_offers.destroy');
-  
+
     // Rutas para supervisores (empresa)
     Route::get('/empresa/supervisores/create', [UserController::class, 'createSupervisor'])->name('empresa.supervisores.create');
     Route::post('/empresa/supervisores', [UserController::class, 'storeSupervisor'])->name('empresa.supervisores.store');

@@ -10,6 +10,16 @@ use Illuminate\Support\Facades\Validator;
 
 class UserController extends Controller
 {
+    // Definir constantes para reglas de validación comunes
+    private const VALIDATION_NAME = 'required|string|max:255';
+    private const VALIDATION_EMAIL = 'required|string|email|max:255|unique:users';
+    private const VALIDATION_PASSWORD = 'required|string|confirmed|min:8';
+    private const VALIDATION_OPTIONAL_PASSWORD = 'nullable|string|confirmed|min:8';
+    private const VALIDATION_CELULAR = 'nullable|digits:9';
+    // Definir una constante para el prefijo de almacenamiento
+    private const STORAGE_DISK = 'public/';
+
+
     /**
      * Mostrar el formulario para crear un nuevo usuario.
      */
@@ -32,12 +42,12 @@ class UserController extends Controller
     {
         // Validación
         $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|confirmed|min:8',
+            'name' => self::VALIDATION_NAME,
+            'email' => self::VALIDATION_EMAIL,
+            'password' => self::VALIDATION_PASSWORD,
             'dni' => 'nullable|digits:8|unique:users',
             'ruc' => 'nullable|digits:11',
-            'celular' => 'nullable|digits:9',
+            'celular' => self::VALIDATION_CELULAR,
             'archivo_cv' => 'nullable|file|mimes:pdf|max:2048',
             'profile_photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'rol' => 'required|integer|in:1,2,3,4',
@@ -130,12 +140,12 @@ class UserController extends Controller
     {
         // Validación
         $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
+            'name' => self::VALIDATION_NAME,
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
-            'password' => 'nullable|string|confirmed|min:8',
+            'password' => self::VALIDATION_OPTIONAL_PASSWORD,
             'dni' => 'nullable|digits:8|unique:users,dni,' . $user->id,
             'ruc' => 'nullable|digits:11',
-            'celular' => 'nullable|digits:9',
+            'celular' => self::VALIDATION_CELULAR,
             'archivo_cv' => 'nullable|file|mimes:pdf|max:2048',
             'profile_photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'rol' => 'required|integer|in:1,2,3,4',
@@ -168,12 +178,12 @@ class UserController extends Controller
      */
     public function destroy(User $user)
     {
-        if ($user->archivo_cv && Storage::exists('public/' . $user->archivo_cv)) {
-            Storage::delete('public/' . $user->archivo_cv);
+        if ($user->archivo_cv && Storage::exists(self::STORAGE_DISK . $user->archivo_cv)) {
+            Storage::delete(self::STORAGE_DISK . $user->archivo_cv);
         }
 
-        if ($user->profile_photo_path && Storage::exists('public/' . $user->profile_photo_path)) {
-            Storage::delete('public/' . $user->profile_photo_path);
+        if ($user->profile_photo_path && Storage::exists(self::STORAGE_DISK . $user->profile_photo_path)) {
+            Storage::delete(self::STORAGE_DISK . $user->profile_photo_path);
         }
 
         $user->delete();
@@ -194,11 +204,11 @@ class UserController extends Controller
     public function storeSupervisor(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|confirmed|min:8',
+            'name' => self::VALIDATION_NAME,
+            'email' => self::VALIDATION_EMAIL,
+            'password' => self::VALIDATION_PASSWORD,
             'dni' => 'nullable|digits:8|unique:users',
-            'celular' => 'nullable|digits:9',
+            'celular' => self::VALIDATION_CELULAR,
         ]);
 
         if ($validator->fails()) {
@@ -228,11 +238,11 @@ class UserController extends Controller
     public function updateSupervisor(Request $request, User $supervisor)
     {
         $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
+            'name' => self::VALIDATION_NAME,
             'email' => 'required|string|email|max:255|unique:users,email,' . $supervisor->id,
-            'password' => 'nullable|string|confirmed|min:8',
+            'password' => self::VALIDATION_OPTIONAL_PASSWORD,
             'dni' => 'nullable|digits:8|unique:users,dni,' . $supervisor->id,
-            'celular' => 'nullable|digits:9',
+            'celular' => self::VALIDATION_CELULAR,
         ]);
 
         if ($validator->fails()) {
@@ -261,8 +271,8 @@ class UserController extends Controller
     private function handleFileUpload(Request $request, $currentFile = null)
     {
         if ($request->hasFile('archivo_cv')) {
-            if ($currentFile && Storage::exists('public/' . $currentFile)) {
-                Storage::delete('public/' . $currentFile);
+            if ($currentFile && Storage::exists(self::STORAGE_DISK . $currentFile)) {
+                Storage::delete(self::STORAGE_DISK . $currentFile);
             }
 
             return $request->file('archivo_cv')->store('cv', 'public');
@@ -274,8 +284,8 @@ class UserController extends Controller
     private function handleProfilePhotoUpload(Request $request, $currentPhoto = null)
     {
         if ($request->hasFile('profile_photo')) {
-            if ($currentPhoto && Storage::exists('public/' . $currentPhoto)) {
-                Storage::delete('public/' . $currentPhoto);
+            if ($currentPhoto && Storage::exists(self::STORAGE_DISK . $currentPhoto)) {
+                Storage::delete(self::STORAGE_DISK . $currentPhoto);
             }
 
             return $request->file('profile_photo')->store('profile_photos', 'public');

@@ -87,7 +87,7 @@ var MILLISECONDS_MULTIPLIER = 1000;
 var TRANSITION_END = 'transitionend'; // Shoutout AngusCroll (https://goo.gl/pxwQGp)
 
 var toType = function toType(obj) {
-  if (obj === null || obj === undefined) {
+    if (obj === null || obj === undefined) {
     return "" + obj;
   }
 
