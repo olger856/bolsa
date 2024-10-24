@@ -37,7 +37,7 @@ pipeline {
                 timeout(time: 8, unit: 'MINUTES') {
                     sh 'composer install'
                     echo 'analizar'
-                    sh 'sudo chmod 755 .env'
+                    sh 'chmod 755 .env'
                     sh 'cp .env.d .env'
                     sh 'php artisan key:generate'
                 }
