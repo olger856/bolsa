@@ -19,11 +19,20 @@ class UserFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => fake()->name(),
-            'email' => fake()->unique()->safeEmail(),
+            'name' => $this->faker->name(),
+            'email' => $this->faker->unique()->safeEmail(),
             'email_verified_at' => now(),
-            'password' => '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', // password
+            'password' => bcrypt('password'), // Encriptar la contraseña
             'remember_token' => Str::random(10),
+            'rol' => 3, // Rol por defecto: Postulante
+            'dni' => $this->faker->unique()->numerify('########'),
+            'ruc' => $this->faker->optional()->numerify('###########'),
+            'celular' => $this->faker->optional()->numerify('#########'),
+            'archivo_cv' => $this->faker->optional()->fileExtension(), // Archivo CV opcional
+            'is_approved' => false, // Campo añadido en la migración
+            'current_team_id' => null, // Puede establecerse si hay equipos
+            'empresa_id' => null, // Puede establecerse si hay una relación con empresas
+            'profile_photo_path' => $this->faker->optional()->imageUrl(), // URL opcional de la foto de perfil
         ];
     }
 
@@ -40,21 +49,28 @@ class UserFactory extends Factory
     public function administrator(): static
     {
         return $this->state(fn (array $attributes) => [
-           'role' =>  User::ROLE_ADMINISTRATOR
+            'rol' => User::ADMIN,
         ]);
     }
 
-    public function teacher(): static
+    public function empresa(): static
     {
         return $this->state(fn (array $attributes) => [
-            'role' =>  User::ROLE_TEACHER
+            'rol' => User::EMPRESA,
         ]);
     }
 
-    public function student(): static
+    public function supervisor(): static
     {
         return $this->state(fn (array $attributes) => [
-            'role' =>  User::ROLE_STUDENT
+            'rol' => User::SUPERVISOR,
+        ]);
+    }
+
+    public function postulante(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'rol' => User::POSTULANTE,
         ]);
     }
 }
