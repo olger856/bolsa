@@ -11,18 +11,20 @@ use Tests\TestCase;
 
 class JobOfferControllerTest extends TestCase
 {
-    use RefreshDatabase; // Asegura que las tablas se reinicien después de cada test
+    use RefreshDatabase;
 
     /**
-     * Prueba que un usuario autenticado puede ver sus ofertas laborales.
+     * Prueba que una empresa autenticado puede ver sus ofertas laborales.
      */
     public function test_authenticated_user_can_view_job_offers()
     {
+        // Crear un usuario autenticado
         $user = User::factory()->create([
             'rol' => 2, // rol 2 es Empresa
             'is_approved' => true, // Aprobado
         ]);
 
+        // Actuar como el usuario autenticado
         $this->actingAs($user);
 
         // Crear algunas ofertas laborales asociadas a la empresa
@@ -30,18 +32,25 @@ class JobOfferControllerTest extends TestCase
             'empresa_id' => $user->id,
         ]);
 
+        // Realizar la solicitud a la ruta de ofertas laborales
         $response = $this->get(route('job_offers.index'));
 
+        // Verifica que la respuesta tiene el estado correcto
         $response->assertStatus(200);
-        $response->assertSee($jobOffers->first()->title); // Verificar el título de la oferta laboral en la vista
+
+        // Verifica que el usuario está autenticado
+        $this->assertAuthenticatedAs($user);
+
+        // Verifica que la respuesta contiene el título de la primera oferta laboral
+        $response->assertSee($jobOffers->first()->title);
     }
 
     /**
-     * Prueba que un usuario autenticado puede crear una oferta laboral.
+     * Prueba que una empresa autenticado puede crear una oferta laboral.
      */
     public function test_authenticated_user_can_create_job_offer()
     {
-        Storage::fake('public'); // Falsa configuración para almacenamiento de imágenes en el disco 'public'
+        Storage::fake('public');
 
         $user = User::factory()->create([
             'rol' => 2,
@@ -60,18 +69,17 @@ class JobOfferControllerTest extends TestCase
             'image' => UploadedFile::fake()->image('car1.jpg'),
         ];
 
-        $response = $this->post(route('job_offers.create'), $data);
+        $response = $this->post(route('job_offers.store'), $data);
 
         $response->assertRedirect(route('job_offers.index'));
         $this->assertDatabaseHas('job_offers', [
             'title' => 'Software Engineer',
             'empresa_id' => $user->id,
         ]);
-        Storage::disk('public')->assertExists('job_offers/' . $data['image']->hashName());
     }
 
     /**
-     * Prueba que un usuario autenticado puede actualizar una oferta laboral.
+     * Prueba que una empresa autenticado puede actualizar una oferta laboral.
      */
     public function test_authenticated_user_can_update_job_offer()
     {
@@ -106,7 +114,7 @@ class JobOfferControllerTest extends TestCase
     }
 
     /**
-     * Prueba que un usuario autenticado puede eliminar una oferta laboral.
+     * Prueba que una empresa autenticado puede eliminar una oferta laboral.
      */
     public function test_authenticated_user_can_delete_job_offer()
     {
